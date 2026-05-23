@@ -26,6 +26,30 @@
 
 ---
 
+## 快速开始
+
+### 前置要求
+
+- Python 3.9+（无其他依赖）
+
+### 3 步上手
+
+```bash
+# 1️⃣  克隆仓库
+git clone https://github.com/Bojingwen/file-smart-sorter.git
+cd file-smart-sorter
+
+# 2️⃣  扫描预览（不会动任何文件）
+python skill/scripts/smart_sort.py --scan ~/Desktop
+
+# 3️⃣  确认无误后执行整理
+python skill/scripts/smart_sort.py --execute ~/.file-sorter-plan.json
+```
+
+就这么简单。不需要 `pip install`，不需要 API Key，不需要配置文件。
+
+---
+
 ## 演示视频
 
 <a href="assets/file-smart-sorter-demo.mp4"><p align="center">🎥 点击播放完整演示视频（12MB）</p></a>
@@ -67,6 +91,9 @@ Desktop/
 ├── 程序_安装包/    ← 38 个
 ├── 压缩包/
 ├── 代码/
+│   └── （前端 / 后端子分类）
+├── 网页/
+├── 设计稿/
 ├── 音频/
 ├── 数据_配置/
 ├── 电子书/
@@ -80,21 +107,28 @@ Desktop/
 
 | | |
 |:--|:--|
-| **规则优先，AI 增强** | 内置 126+ 扩展名 + 文件名模式匹配，覆盖 ~98% 文件无需 AI。剩余 ~2% 才调用 AI 判断。 |
+| **规则优先，AI 增强** | 内置 200+ 扩展名 + 文件名模式匹配，覆盖 ~98% 文件无需 AI。剩余 ~2% 才调用 AI 判断。 |
 | **适用任何文件夹** | 桌面、下载、文档、项目输出……哪里乱就整理哪里，不做目录假设。 |
 | **安全第一** | 默认只预览不操作；敏感路径自动拦截；每次执行生成可回滚的操作日志。 |
 | **多 AI 后端** | OpenAI / DeepSeek / Ollama / 任何 OpenAI 兼容接口，自由选择。 |
 | **纯 Python 零依赖** | 不需要 `pip install` 任何东西，`python smart_sort.py` 直接跑。 |
 | **全中文界面** | 所有输出和提示均为中文，对非技术用户同样友好。 |
 
-### 识别范围一览（17 大类 + 智能子分类）
+### 识别范围一览（15 大类扩展名 + 6 种智能模式匹配）
+
+**扩展名分类（15 类）：**
 
 ```
 文档 │ 图片 │ 视频 │ 音频 │ 压缩包
-程序/安装包 │ 安卓应用 │ 苹果应用 │ 代码 │ 数据/配置
-字体 │ 电子书 │ 磁盘映像
-──── 智能模式匹配 ────
-截图 │ 发票/收据 │ 简历 │ 报告 │ 备份 │ 崩溃日志
+程序/安装包 │ 安卓应用 │ 苹果应用 │ 代码 │ 网页
+数据/配置 │ 字体 │ 电子书 │ 磁盘映像 │ 设计稿
+```
+
+**文件名智能匹配（6 类）：**
+
+```
+截图(Screenshot) │ 发票/收据(invoice) │ 简历(resume)
+报告(report) │ 备份(backup) │ 崩溃日志(.crash/.dmp)
 ```
 
 ---
@@ -113,7 +147,7 @@ Skill 自动完成：扫描 → 分类 → 可视化预览 → 等你确认 → 
 
 详细定义见 [SKILL.md](skill/SKILL.md)。
 
-### 方式二：命令行调用
+### 方式二：命令行直接调用
 
 ```bash
 # 1️⃣  扫描预览（dry-run，不会动任何文件）
@@ -130,7 +164,7 @@ python skill/scripts/smart_sort.py --scan ~/Desktop --copy
 python skill/scripts/smart_sort.py --scan ~/Downloads --clean-names
 
 # 5️⃣  执行已确认的计划
-python skill/scripts/skill/smart_sort.py --execute ~/.file-sorter-plan.json
+python skill/scripts/smart_sort.py --execute ~/.file-sorter-plan.json
 ```
 
 <details>
@@ -151,6 +185,18 @@ python skill/scripts/smart_sort.py --scan ~/Desktop --ai \
 
 </details>
 
+<details>
+<summary><b>常见场景速查（点开查看）</b></summary>
+
+| 场景 | 命令 | 建议 |
+|------|------|------|
+| 整理桌面 | `--scan ~/Desktop` | 加 `--clean-names` |
+| 清理下载 | `--scan ~/Downloads` | 文件量大时先预览 |
+| 归档文档 | `--scan ~/Documents` | 用 `--copy` 模式 |
+| 整理项目产出 | `--scan ./output` | 结合 AI 分类 |
+
+</details>
+
 ---
 
 ## 工作原理
@@ -168,8 +214,8 @@ python skill/scripts/smart_sort.py --scan ~/Desktop --ai \
      ┌─────────────────────────────────┐
      │  Step 2  规则分类引擎  (~98%)    │  ⚡ 零成本，无网络请求
      │                                 │
-     │  · 扩展名精确匹配               │  .pdf→文档  .apk→安卓应用
-     │  · 文件名语义匹配               │  Screenshot→截图  invoice→发票
+     │  · 扩展名精确匹配 (15 类 200+)   │  .pdf→文档  .apk→安卓应用
+     │  · 文件名语义匹配 (6 种模式)      │  Screenshot→截图
      └──────────────┬──────────────────┘
                     ▼ 未命中
      ┌─────────────────────────────────┐
@@ -218,20 +264,21 @@ file-smart-sorter/
 ├── skill/                           # ═══ WorkBuddy Skill 核心 ═══
 │   ├── SKILL.md                     #   Skill 定义与工作流规范
 │   ├── scripts/
-│   │   └── smart_sort.py            #   分类引擎 + CLI 入口（~800 行）
+│   │   └── smart_sort.py            #   分类引擎 + CLI 入口（~820 行）
 │   ├── references/
 │   │   └── category_rules.md        #   分类规则详细参考
 │   └── assets/
-│       └── categories.json          #   可扩展的分类配置
+│       └── categories.json          #   可扩展的分类配置（15 类 200+ 扩展名）
 │
 └── assets/
     └── file-smart-sorter-demo.mp4   # 产品演示视频
 ```
 
-**代码亮点：**
-- 单脚本架构 — 一个 `.py` 文件包含全部功能，零外部依赖
-- 插件化分类 — 通过 `categories.json` 自定义/扩展分类规则
-- 双模式设计 — 规则引擎兜底 + AI 增强，有 Key 更强，没 Key 照样跑
+**设计亮点：**
+- **单脚本架构** — 一个 `.py` 文件包含全部功能，零外部依赖
+- **插件化分类** — 通过 `categories.json` 自定义/扩展分类规则，无需改代码
+- **双引擎设计** — 规则引擎兜底 + AI 增强，有 Key 更强，没 Key 照样跑
+- **数据驱动** — 分类体系全部由 JSON 配置，代码和规则完全解耦
 
 ---
 
